@@ -9,12 +9,15 @@ local function GetUIContainer()
 end
 
 local function ObfuscateProcess(source)
-    -- 1. 【25ms 风格伪装】直接注入到生成的代码最顶层
+   
+    local fakeError = [[
+-- zgi obf
 local fenv = getfenv()
 local _ = fenv._ENV
 task.spawn(function() 
-    warn("ex Power by zhi obf")
+    warn("zhi obf")
 end)
+]]
 
     -- 2. 核心防御 (物理自毁)
     local anti = "if pcall(function()return game:IsA(nil)end)then error('line 1: gng wtf')end;"
