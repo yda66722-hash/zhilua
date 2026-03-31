@@ -8,10 +8,9 @@ local function GetUIContainer()
     return success and res or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 end
 
-local function ObfuscateProcess(source)
-   
+local function ObfuscateProcess(source) 
     local fakeError = [[
--- zgi obf
+-- zhi obf
 local fenv = getfenv()
 local _ = fenv._ENV
 task.spawn(function() 
