@@ -1,0 +1,118 @@
+-- [[ zhiUI 基础功能加载脚本 ]] --
+-- 引用远程 UI 库 (确保你的 GitHub 链接是最新的)
+local zhiUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/yda66722-hash/zhiUI/refs/heads/main/zhiUI"))()
+
+-- 初始化窗口
+local Lib = zhiUI:CreateWindow({
+    Title = "zhiUI 核心工具箱"
+})
+
+-- ==========================================
+-- [ 1. 玩家增强 ]
+-- ==========================================
+local PlayerTab = Lib:AddTab("玩家增强")
+
+PlayerTab:AddSlider("移动速度 (Speed)", 16, 250, 16, function(v)
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = v
+    end
+end)
+
+PlayerTab:AddSlider("跳跃高度 (Power)", 50, 500, 50, function(v)
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.JumpPower = v
+        char.Humanoid.UseJumpPower = true
+    end
+end)
+
+PlayerTab:AddToggle("无限跳跃 (Inf Jump)", false, function(state)
+    _G.InfJump = state
+    local UserInputService = game:GetService("UserInputService")
+    UserInputService.JumpRequest:Connect(function()
+        if _G.InfJump then
+            local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum:ChangeState("Jumping") end
+        end
+    end)
+end)
+
+-- ==========================================
+-- [ 2. 视觉辅助 ]
+-- ==========================================
+local VisualTab = Lib:AddTab("视觉辅助")
+
+VisualTab:AddToggle("全亮模式 (FullBright)", false, function(state)
+    if state then
+        game:GetService("Lighting").Ambient = Color3.fromRGB(255, 255, 255)
+        game:GetService("Lighting").Brightness = 2
+    else
+        game:GetService("Lighting").Ambient = Color3.fromRGB(0, 0, 0)
+        game:GetService("Lighting").Brightness = 1
+    end
+end)
+
+VisualTab:AddButton("开关玩家名字 (ESP)", function()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer and player.Character then
+            local head = player.Character:FindFirstChild("Head")
+            if head then
+                local tag = head:FindFirstChild("ZhiTag")
+                if tag then
+                    tag:Destroy()
+                else
+                    local bgui = Instance.new("BillboardGui", head)
+                    bgui.Name = "ZhiTag"
+                    bgui.AlwaysOnTop = true
+                    bgui.Size = UDim2.new(0, 100, 0, 50)
+                    bgui.StudsOffset = Vector3.new(0, 3, 0)
+                    
+                    local text = Instance.new("TextLabel", bgui)
+                    text.BackgroundTransparency = 1
+                    text.Size = UDim2.new(1, 0, 1, 0)
+                    text.Text = player.DisplayName or player.Name
+                    text.TextColor3 = Color3.new(1, 1, 1)
+                    text.Font = Enum.Font.GothamBold
+                    text.TextSize = 14
+                end
+            end
+        end
+    end
+end)
+
+-- ==========================================
+-- [ 3. 实用工具 ]
+-- ==========================================
+local ToolTab = Lib:AddTab("实用工具")
+
+ToolTab:AddToggle("防挂机 (Anti-AFK)", true, function(state)
+    if state then
+        local vu = game:GetService("VirtualUser")
+        game.Players.LocalPlayer.Idled:Connect(function()
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new())
+        end)
+    end
+end)
+
+ToolTab:AddButton("复制当前坐标", function()
+    local pos = game.Players.LocalPlayer.Character.PrimaryPart.Position
+    setclipboard(tostring(pos))
+end)
+
+ToolTab:AddButton("重新连接服务器", function()
+    game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+end)
+
+-- ==========================================
+-- [ 4. 设置 ]
+-- ==========================================
+local SettingsTab = Lib:AddTab("设置")
+
+SettingsTab:AddButton("销毁所有 UI", function()
+    local CoreGui = game:GetService("CoreGui")
+    for _, v in pairs(CoreGui:GetChildren()) do
+        if v.Name:sub(1,6) == "zhiUI_" then v:Destroy() end
+    end
+end)
